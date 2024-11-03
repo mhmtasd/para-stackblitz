@@ -45,15 +45,66 @@ const config = {
   chatLog: true
 };
 
-// Bot oluşturma
-const bot = mineflayer.createBot({
-  host: config.server.ip,
-  port: config.server.port,
-  username: config.botAccount.username,
-  password: config.botAccount.password,
-  version: config.server.version,
-  auth: config.botAccount.type
-});
+let bot;
+
+// Bot başlatma fonksiyonu
+function startBot() {
+  bot = mineflayer.createBot({
+    host: config.server.ip,
+    port: config.server.port,
+    username: config.botAccount.username,
+    password: config.botAccount.password,
+    version: config.server.version,
+    auth: config.botAccount.type
+  });
+
+  // Bot olay dinleyicileri
+  bot.on('spawn', () => {
+    console.log('Bot bağlandı!');
+    botConnected = true;
+
+    if (config.utils.autoAuth.enabled) {
+      bot.chat(`/login ${config.utils.autoAuth.password}`);
+      console.log(`Otomatik giriş: /login ${config.utils.autoAuth.password}`);
+    }
+
+    // Mesaj gönderme işlevi
+    if (config.utils.chatMessages.enabled) {
+      config.utils.chatMessages.messages.forEach((messageObj, index) => {
+        setInterval(() => {
+          bot.chat(messageObj.text);
+          console.log(`Gönderildi: ${messageObj.text}`);
+        }, messageObj.delay * 1000);
+      });
+    }
+
+    // Anti-AFK işlevi
+    if (config.utils.antiAfk.enabled) {
+      setInterval(() => {
+        bot.setControlState('jump', true);
+        setTimeout(() => {
+          bot.setControlState('jump', false);
+        }, 100);
+        console.log("Bot zıpladı.");
+      }, 10000);
+    }
+  });
+
+  // Sohbet mesajlarını dinleme
+  bot.on('message', (message) => {
+    console.log(message.toString());
+  });
+
+  // Bağlantı kesildiğinde yeniden bağlanma
+  bot.on('end', () => {
+    console.log('Bot bağlantısı kesildi. Yeniden bağlanacak...');
+    botConnected = false;
+    setTimeout(startBot, config.utils.autoReconnectDelay); // Botu yeniden başlat
+  });
+}
+
+// Botu başlat
+startBot();
 
 // Web sunucusu
 app.get('/', (req, res) => {
@@ -67,54 +118,4 @@ app.get('/', (req, res) => {
 // Sunucu bağlantısını başlat
 app.listen(port, () => {
   console.log(`Sunucu ${port} numaralı bağlantı noktasında yürütülüyor.`);
-});
-
-// Bot olay dinleyicileri
-bot.on('spawn', () => {
-  console.log('Bot bağlandı!');
-  botConnected = true;
-
-  if (config.utils.autoAuth.enabled) {
-    bot.chat(`/login ${config.utils.autoAuth.password}`);
-    console.log(`Otomatik giriş: /login ${config.utils.autoAuth.password}`);
-  }
-
-  // Mesaj gönderme işlevi
-  if (config.utils.chatMessages.enabled) {
-    config.utils.chatMessages.messages.forEach((messageObj, index) => {
-      setInterval(() => {
-        bot.chat(messageObj.text);
-        console.log(`Gönderildi: ${messageObj.text}`);
-      }, messageObj.delay * 1000);
-    });
-  }
-
-  if (config.utils.antiAfk.enabled) {
-    setInterval(() => {
-      bot.setControlState('jump', true);
-      setTimeout(() => {
-        bot.setControlState('jump', false);
-      }, 100);
-      console.log("Bot zıpladı.");
-    }, 10000);
-  }
-});
-
-bot.on('message', (message) => {
-  console.log(message.toString());
-});
-
-bot.on('end', () => {
-  console.log('Bot bağlantısı kesildi. Yeniden bağlanacak...');
-  botConnected = false;
-  setTimeout(() => {
-    mineflayer.createBot({ 
-      host: config.server.ip, 
-      port: config.server.port, 
-      username: config.botAccount.username, 
-      password: config.botAccount.password, 
-      version: config.server.version, 
-      auth: config.botAccount.type 
-    });
-  }, config.utils.autoReconnectDelay);
 });
