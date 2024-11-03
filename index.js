@@ -81,12 +81,17 @@ function startBot() {
     // Anti-AFK işlevi
     if (config.utils.antiAfk.enabled) {
       setInterval(() => {
-        bot.setControlState('jump', true);
+        const moveDirections = ['forward', 'back', 'left', 'right'];
+        const randomDirection = moveDirections[Math.floor(Math.random() * moveDirections.length)];
+        
+        // Rastgele bir yön seç ve kısa süre hareket et
+        bot.setControlState(randomDirection, true);
         setTimeout(() => {
-          bot.setControlState('jump', false);
-        }, 100);
-        console.log("Bot zıpladı.");
-      }, 10000);
+          bot.setControlState(randomDirection, false);
+        }, 500); // 0.5 saniye hareket et
+        
+        console.log(`Bot ${randomDirection} yönüne hareket etti.`);
+      }, 10000); // Her 10 saniyede bir hareket et
     }
   });
 
