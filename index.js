@@ -25,9 +25,9 @@ const config = {
     chatMessages: {
       enabled: true,
       messages: [
-        { text: "Tanesi 530$ Sınırsız Demir Blok Alınır /is go EymanBey !!! (Alımlar aktif, dilediğiniz kadar satın!)", delay: 90 },
+        { text: "/is accept EymanBey", delay: 15 },
         { text: "/skyblock", delay: 5 },
-        { text: "/is go EymanBey", delay: 50 }
+        { text: "/is go EymanBey", delay: 15 }
       ]
     },
     antiAfk: {
