@@ -27,7 +27,7 @@ const config = {
       messages: [
         { text: "/is accept EymanBey", delay: 15 },
         { text: "/skyblock", delay: 5 },
-        { text: "/home 1", delay: 15 }
+        { text: "/is go FlavioQuinto", delay: 15 }
       ]
     },
     antiAfk: {
